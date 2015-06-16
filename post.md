@@ -545,7 +545,7 @@ To test it we need to load the directive's module but also the one holding all t
 
 Then we `$compile`the directive and apply the desired scope so we can check for what have been rendered using the jQuery/jqLite helpers.
 
-```js
+```javascript
 describe('Directive: myDirective', function() {
 
   beforeEach(module('myDirectiveModule'));
