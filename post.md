@@ -1,6 +1,6 @@
 Unit testing, as the name implies, is about testing individual units of code.
 
-This post tries to show some patterns and guidelines to help us with unit testing Angular applications after setting some basic configuration.
+This post tries to show some patterns and guidelines to help us with unit testing Angular applications after setting some minimum configuration.
 
 ## Configuration
 
@@ -248,7 +248,7 @@ function MyController($scope, myService) {
 
 ####Specs
 
-We create the basic structure of the test suite loading the mocked service after the controller's module. 
+We write the essential structure of the test suite loading the mocked service after the controller's module. 
 
 ```javascript
 describe('Controller: MyController', function() {
