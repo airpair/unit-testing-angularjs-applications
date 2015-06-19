@@ -2,6 +2,8 @@ Unit testing, as the name implies, is about testing individual units of code.
 
 This post tries to show a few patterns and guidelines to help us with unit testing Angular applications after setting some minimum configuration.
 
+It's aimed to people who is already familiar with Angular but haven't gone deep into unit testing their applications. Although it should be helpful too for completely beginners.
+
 ## Configuration
 
 Before we start testing we need to install and configure several dependencies. For this we will be using the package manager [npm](https://www.npmjs.com/), although [Bower](http://bower.io/) can be used as well.
