@@ -7,16 +7,18 @@ This post tries to show a few patterns and guidelines to help us with unit testi
 Before we start testing we need to install and configure several dependencies. For this we will be using the package manager [npm](https://www.npmjs.com/), although [Bower](http://bower.io/) can be used as well.
 
 ```
-$ npm install angular
-$ bower install angular
+npm install angular --save
+bower install angular --save
 ```
+
+Note that we can skip to the [files](#files) section if we don't want to go step by step.
 
 ### ngMock
 
 Angular provides [ngMock](https://docs.angularjs.org/api/ngMock) to inject and mock services into unit tests. And one of the most useful parts of the `ngMock` module is `$httpBackend` which lets us mock XHR requests.
 
 ```
-$ npm install angular-mocks --save-dev
+npm install angular-mocks --save-dev
 ```
 
 ### Karma
@@ -24,7 +26,7 @@ $ npm install angular-mocks --save-dev
 [Karma](http://karma-runner.github.io/) is a test runner written by the Angular team which allow us to execute tests in multiple browsers.
 
 ```
-$ npm install karma --save-dev
+npm install karma --save-dev
 ```
 
 After installing it we need to crete a configuration file running `karma init` but to extend its functionality we need to install first some plugins.
@@ -34,7 +36,7 @@ After installing it we need to crete a configuration file running `karma init` b
 Angular can be tested using any JavaScript unit testing framework out there, but [Jasmine](http://jasmine.github.io/) is probably the most popular.
 
 ```
-$ npm install karma-jasmine jasmine-core --save-dev
+npm install karma-jasmine jasmine-core --save-dev
 ```
 
 #### Browsers
@@ -42,12 +44,12 @@ $ npm install karma-jasmine jasmine-core --save-dev
 Karma takes care of auto-capturing and killing the browsers, but we need to install at least one of these launchers.
 
 ```
-$ npm install karma-chrome-launcher --save-dev
-$ npm install karma-phantomjs-launcher --save-dev
-$ npm install karma-firefox-launcher --save-dev
-$ npm install karma-safari-launcher --save-dev
-$ npm install karma-opera-launcher --save-dev
-$ npm install karma-ie-launcher --save-dev
+npm install karma-chrome-launcher --save-dev
+npm install karma-phantomjs-launcher --save-dev
+npm install karma-firefox-launcher --save-dev
+npm install karma-safari-launcher --save-dev
+npm install karma-opera-launcher --save-dev
+npm install karma-ie-launcher --save-dev
 ```
 
 #### Templates preprocessor
@@ -60,15 +62,43 @@ When testing directives we need to set up Karma to serve our templates using a p
 $ npm install karma-ng-html2js-preprocessor --save-dev
 ```
 
+### Files
+
+#### package.json
+
+If we haven't followed all the previous steps we must copy the following `package.json` and run `npm install` to have all the required dependencies.
+
+```javascript
+{
+  "name": "unit-testing-angularjs-applications",
+  "version": "1.0.0",
+  "description": "Unit testing AngularJS applications.",
+  "dependencies": {
+    "angular": "^1.3.15"
+  },
+  "devDependencies": {
+    "angular-mocks": "^1.3.15",
+    "jasmine-core": "^2.3.4",
+    "karma": "^0.12.32",
+    "karma-chrome-launcher": "^0.1.12",
+    "karma-jasmine": "^0.3.5",
+    "karma-ng-html2js-preprocessor": "^0.1.2"
+  },
+  "scripts": {
+    "test": "karma start"
+  }
+}
+```
+
 #### karma.conf.js
 
 If we haven't generated yet a configuration file now it's the time.
 
 ```
-$ karma init
+karma init
 ```
 
-After answering some questions it will create a ``karma.conf.js`` file which we still have to modify for at least configuring the installed preprocessors.
+After answering some questions it will create a `karma.conf.js` file which we still have to modify for at least configuring the installed preprocessors.
 
 The final configuration file should look as follows.
 
@@ -116,6 +146,13 @@ module.exports = function(config) {
     singleRun: false
   });
 };
+```
+
+And we can run our tests with any of these two commands.
+
+```
+karma start
+npm test
 ```
 
 ## Mocks
