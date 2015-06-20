@@ -674,7 +674,6 @@ angular.module('myDirectiveModule', [])
       controller: function() {
         var vm = this;
         vm.doSomething = doSomething;
-
         function doSomething() {
           vm.something.name = 'Do something';
         }
@@ -684,7 +683,7 @@ angular.module('myDirectiveModule', [])
       scope: {
         something: '='
       },
-      templateUrl: 'app/my-directive.html'
+      templateUrl: 'my-directive.html'
     };
   });
 ```
@@ -699,7 +698,7 @@ And the external template to see `ng-html2js` in action.
 
 To test it we need to load the directive's module but also the one holding all the templates that we have configured with `ng-html2js`.
 
-Then we `$compile`the directive and apply the desired scope so we can check for what have been rendered using the jQuery/jqLite helpers.
+Next we `$compile`the directive and apply the desired scope. 
 
 ```javascript
 describe('Directive: myDirective', function() {
@@ -717,26 +716,34 @@ describe('Directive: myDirective', function() {
     scope.$apply();
   }));
 
+});
+```
+
+Using the jQuery/jqLite methods we can check for what have been rendered.
+
+```javascript
   it('should render something', function() {
     var h1 = element.find('h1');
     expect(h1.text()).toBe('My thing');
   });
+```
 
+And applying changes to the scope the rendered DOM should be updated.
+
+
+```javascript
   it('should update the rendered text when scope changes', function() {
     scope.thing.name = 'My new thing';
     scope.$apply();
     var h1 = element.find('h1');
     expect(h1.text()).toBe('My new thing');
   });
-
-});
 ```
 
 If is needed we can test the directive controller grabbing an instance of it.
 
 
 ```javascript
-
   describe('Directive controller', function() {
 
     var controller;
@@ -786,7 +793,7 @@ function helloWorld() {
 
 ####Specs
 
-To test it we first intercept the provider and after we inject the service so we can test both instances.
+We intercept the provider when we load the module before triggering the injection.
 
 ```javascript
 describe('Provider: helloWorld', function() {
@@ -803,6 +810,12 @@ describe('Provider: helloWorld', function() {
     helloWorld = _helloWorld_;
   }));
 
+});
+```
+
+And then we can test both instances.
+
+```javascript
   it('should do something', function() {
     expect(!!helloWorldProvider).toBe(true);
   });
@@ -818,8 +831,6 @@ describe('Provider: helloWorld', function() {
     });
 
   });
-
-});
 ```
 
 ##Conclusion
