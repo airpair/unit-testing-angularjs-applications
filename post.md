@@ -267,7 +267,55 @@ We should test for the state, synchronous and asynchronous calls to services, an
 
 #### Code
 
-We create our basic controller using the `controller as` syntax and injecting the required dependencies.
+We create our basic controller using the `controller as` syntax. And we inject the dependencies on a external service and the `$scope` for using events.
+
+```javascript
+angular.module('myControllerModule', ['myServiceModule'])
+  .controller('MyController', ['$scope', 'myService', MyController]);
+
+function MyController($scope, myService) {
+  var vm = this;
+}
+```
+Then we expose a method and different types of properties to the view.
+
+```javascript
+  vm.hasError = false;
+  vm.myProperty = 'My Controller';
+  vm.myArray = [];
+  vm.myObject = myService.syncCall();
+  vm.myNumber = 0;
+  vm.changeProperty = changeProperty;
+  
+  function changeProperty(value) {
+    vm.myProperty = value;
+  }
+```
+
+We call the service asynchronously setting the success and error handlers.
+
+```javascript
+  myService.asyncCall().then(
+    function(data) {
+      vm.myArray = data;
+    },
+    function() {
+      vm.hasError = true;
+    }
+  );
+```
+
+And finally we use the `$scope' to handle events.
+  
+```javascript
+  $scope.$emit('my-event');
+
+  $scope.$on('some-event', function() {
+    vm.myNumber++;
+  });
+```
+
+Having thus this code.
 
 ```javascript
 angular.module('myControllerModule', ['myServiceModule'])
@@ -314,7 +362,16 @@ describe('Controller: MyController', function() {
 
   beforeEach(module('myControllerModule'));
   beforeEach(module('myServiceMock'));
+  
+});
+```
 
+For testing calls to other services we need to spy their methods. And Jasmine provides us with the [spyOn](http://jasmine.github.io/2.0/introduction.html#section-Spies) function to track calls and arguments passed.
+
+With `callThrough()` we delegate to the actual implementation. However for the asynchronous method we need to mock its behaviour returning a promise provided by the [$q](https://docs.angularjs.org/api/ng/service/$q) service.
+
+
+```javascript
   var myService;
   var deferred;
   // Mock services and spy on methods
@@ -324,7 +381,11 @@ describe('Controller: MyController', function() {
     spyOn(myService, 'syncCall').and.callThrough();
     spyOn(myService, 'asyncCall').and.returnValue(deferred.promise);
   }));
+```
 
+To keep it dry we initialize the controller passing the mocked dependencies in a different `beforeEach` block.
+
+```javascript
   var MyController;
   var scope;
   // Initialize the controller and a mock scope.
@@ -336,13 +397,9 @@ describe('Controller: MyController', function() {
       myService: myService
     });
   }));
-  
-  // Write specs.
-  
-});
 ```
 
-And we start testing the state of our controller. As we use the `controller as` syntax we don't need to test for the `$scope` but directly for the exposed properties and methods of the controller.
+And we start testing the state of our controller. As we use the `controller as` syntax we don't need to test for the `$scope` but directly for the **exposed properties and methods** of the controller.
 
 
 ```javascript
@@ -361,19 +418,21 @@ And we start testing the state of our controller. As we use the `controller as` 
       expect(angular.isFunction(MyController.changeProperty)).toBe(true);
     });
 
+  });
+```
+
+For testing the actual **behaviour of a method** we need to fire it with different arguments.
+
+```javascript
     it('should change myProperty', function() {
       MyController.changeProperty(true);
       expect(MyController.myProperty).toBe(true);
       MyController.changeProperty(false);
       expect(MyController.myProperty).toBe(false);
     });
-
-  });
 ```
 
-For testing calls to other services we need to spy their methods. And Jasmine provides us with the [spyOn](http://jasmine.github.io/2.0/introduction.html#section-Spies) function to track calls and arguments passed.
-
-When setting the test suite we have made the asynchronous call to return a promise, that we can now resolve or reject as our convenience.
+While testing **calls to services** it's straight forward using Jasmine spies. 
 
 ```javascript
   describe('Synchronous calls', function() {
@@ -384,14 +443,24 @@ When setting the test suite we have made the asynchronous call to return a promi
     });
 
   });
-
+  
   describe('Asynchronous calls', function() {
 
     it('should call asyncCall on myService', function() {
       expect(myService.asyncCall).toHaveBeenCalled();
       expect(myService.asyncCall.calls.count()).toBe(1);
     });
+    
+  });
+```
 
+In adittion, we need to test **promise resolution** for asynchronous methods.
+
+
+When setting the test suite we have made the asynchronous call to return a promise, that we can now resolve or reject as our convenience to test **success and error**.
+
+
+```javascript
     it('should do something on success', function() {
       var data = ['something', 'on', 'success'];
       deferred.resolve(data); // Resolve the promise.
@@ -406,11 +475,9 @@ When setting the test suite we have made the asynchronous call to return a promi
       // Check for state on error.
       expect(MyController.hasError).toBe(true);
     });
-
-  });
 ```  
 
-And the only place where we need to test the `$scope`, it's when we emit or listen for events.
+And with the `controller as` syntax the only place where we need to test the `$scope` it's when we **emit or listen for events**.
   
 ```javascript
   describe('Events', function() {
