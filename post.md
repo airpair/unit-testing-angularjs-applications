@@ -215,7 +215,18 @@ In any case it's good to **load the mocked modules after** the module we are tes
 
 ## Testing
 
-We can make testing simpler if we follow the same pattern to test each of our objects:
+As code and specs are better placed side-by-side we can put all our files inside the `src` folder, using the `.spec.js` suffix to differentiate test files.
+
+```
+src/my-controller.js
+src/my-controller.spec.js
+src/my-directive.js
+src/my-directive.spec.js
+src/my-service.js
+src/my-service.spec.js
+```
+
+An we can make testing simpler if we follow the same pattern to test each of our objects:
 
 1. Describe the object with type and name.
 2. Load our object's module.
@@ -227,16 +238,25 @@ We can make testing simpler if we follow the same pattern to test each of our ob
   3. We need to $compile directives.
 6. Write expectations grouped in describe blocks.
 
-As code and specs are better placed side-by-side we can put all our files inside the `src` folder, using the `.spec.js` suffix to differentiate test files.
+Therefore all our test files will have the same structure with the common content in `beforeEach` blocks that run before every test. And nested `describe` blocks containing the self-describing expectations inside of `it` blocks.
 
-```
-src/my-controller.js
-src/my-controller.spec.js
-src/my-directive.js
-src/my-directive.spec.js
-src/my-service.js
-src/my-service.spec.js
+```javascript
+describe('ObjectType: objectName', function() {
 
+  beforeEach(module('objectModule'));
+
+  var myObject;
+  beforeEach(inject(function(_myObject_) {
+    myObject = _myObject_;
+  }));
+
+  describe('Method: methodName', function() {
+    it('should do ...', function() {
+      expect(true).toBe(true);
+    });
+  });
+  
+});
 ```
 
 ### Controllers
