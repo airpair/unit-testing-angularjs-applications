@@ -370,7 +370,6 @@ For testing calls to other services we need to spy their methods. And Jasmine pr
 
 With `callThrough()` we delegate to the actual implementation. However for the asynchronous method we need to mock its behaviour returning a promise provided by the [$q](https://docs.angularjs.org/api/ng/service/$q) service.
 
-
 ```javascript
   var myService;
   var deferred;
@@ -400,7 +399,6 @@ To keep it dry we initialize the controller passing the mocked dependencies in a
 ```
 
 And we start testing the state of our controller. As we use the `controller as` syntax we don't need to test for the `$scope` but directly for the **exposed properties and methods** of the controller.
-
 
 ```javascript
   describe('State', function() {
@@ -456,7 +454,6 @@ While testing **calls to services** it's straight forward using Jasmine spies.
 
 In adittion, we need to test **promise resolution** for asynchronous methods.
 
-
 When setting the test suite we have made the asynchronous call to return a promise, that we can now resolve or reject as our convenience to test **success and error**.
 
 
@@ -507,7 +504,7 @@ But as we don't want to send XHR requests to a real server we use
 
 ####Code
 
-We layout a simple service with a couple of synchronous methods and one asynchronous that use the native `$http` service to query an external API for data.
+We lay out a simple service with a synchronous method that calculates the factorial and one asynchronous that uses the native `$http` service to query an external API for data.
 
 ```javascript
 angular.module('myServiceModule', [])
@@ -516,30 +513,25 @@ angular.module('myServiceModule', [])
 function MyService($http, $q) {
 
   var f = [];
-
+  
   this.factorial = factorial;
-  this.syncCall = syncCall;
-  this.asyncCall = asyncCall;
+  this.getThings = getThings;
 
   function factorial(n) {
-    if (n === 0 || n === 1) {
-      return 1;
-    }
-    if (f[n] > 0) {
-      return f[n];
-    }
+    if (n === 0 || n === 1) { return 1; }
+    if (f[n] > 0) { return f[n]; }
     f[n] = factorial(n-1) * n;
     return f[n];
   }
 
-  function syncCall() {
-    return {
-      name: 'Synchronous Call'
-    };
-  }
+}
+```
 
-  function asyncCall() {
-    return $http.get('http://jsonplaceholder.typicode.com/users').then(
+Note that if we return a non-promised value from the error callback it will resolve and not reject the derived promise. So we need to reject it explicitly.
+
+```javascript
+  function getThings() {
+    return $http.get('/api/things').then(
       function(response) {
         return response.data;
       },
@@ -548,14 +540,11 @@ function MyService($http, $q) {
       }
     );
   }
-
-}
 ```
-
 
 ####Specs
 
-For testing the synchronous methods we just need to check that their output is the one we are expecting.
+Setting the test we need to get hold of the `$httpBackend` to mock the calls to the API and test for the expected results.
 
 ```javascript
 describe('Service: myService', function() {
@@ -569,6 +558,12 @@ describe('Service: myService', function() {
     myService = _myService_;
   }));
 
+});
+```
+
+For testing **synchronous methods** we just need to check that their output is the one we are expecting.
+
+```javascript
   describe('Output of methods', function() {
 
     it('should return the product of all positive integers less than or equal to n', function() {
@@ -578,11 +573,15 @@ describe('Service: myService', function() {
     });
 
   });
-
-});
 ```
 
-But the fun starts when we test our asynchronous methods as we need to get hold of the `$httpBackend` to mock the calls to the API and test for the expected results.
+But the fun starts when we test our **asynchronous methods**. 
+
+For our tests to run quickly we use the mocked `$httpBackend` implementation to respond with data to our calls hence avoiding expensive requests to a real server.
+
+As requests are treated asynchronously we need to flush them and that's the reason why we add an `afterEach` block to verify there is nothing pending at the end of the tests.
+
+Testing that our **backend is being called** we just need to create expectations with the address of our API endpoint.
 
 ```javascript
   describe('HTTP calls', function() {
@@ -598,20 +597,38 @@ But the fun starts when we test our asynchronous methods as we need to get hold 
       httpBackend.flush();
     });
 
-    it('should return an array of things on success', function() {
-      var response = ['one thing', 'another thing'];
-      var myThings = [];
-      var errorStatus = '';
-      var handler = {
+  });
+```
+
+Though testing the **returned values** it's more complicated to set. 
+
+First we need to spy upon an object with success and error handlers that will be passed to the method call.
+
+```javascript
+    var myThings;
+    var errorStatus; = '';
+    var handler;
+    beforeEach(function() {
+      myThings = [];
+      errorStatus = '';
+      handler = {
         success: function(data) {
           myThings = data;
         },
         error: function(data) {
           errorStatus = data;
         }
-      };
+      }; 
       spyOn(handler, 'success').and.callThrough();
       spyOn(handler, 'error').and.callThrough();
+    });
+```
+
+And after we need to create a backend definition with the response to test the handler has been called with the expected values.
+
+```javascript
+    it('should return an array of things on success', function() {
+      var response = ['one thing', 'another thing'];
 
       httpBackend.whenGET(/\/api\/things/).respond(response);
       myService.getThings().then(handler.success, handler.error);
@@ -622,8 +639,21 @@ But the fun starts when we test our asynchronous methods as we need to get hold 
       expect(handler.error).not.toHaveBeenCalled();
       expect(errorStatus).toEqual('');
     });
+```
 
-  });
+If we need to **simulate an error** we have to pass a numeric value bigger than 300 as the first parameter of the response.
+
+```javascript
+    it('should return the status on error', function() {
+      httpBackend.whenGET(/\/api\/things/).respond(404, {status: 404});
+      myService.getThings().then(handler.success, handler.error);
+      httpBackend.flush();
+
+      expect(handler.error).toHaveBeenCalled();
+      expect(errorStatus).toEqual(404);
+      expect(handler.success).not.toHaveBeenCalled();
+      expect(myThings).toEqual([]);
+    });
 ```
 
 ### Directives
