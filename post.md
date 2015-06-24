@@ -61,7 +61,15 @@ When testing directives we need to set up Karma to serve our templates using a p
 [ng-html2js](https://github.com/karma-runner/karma-ng-html2js-preprocessor) creates a "templates" module and put the HTML into the `$templateCache`.
 
 ```
-$ npm install karma-ng-html2js-preprocessor --save-dev
+npm install karma-ng-html2js-preprocessor --save-dev
+```
+
+**Code coverage**
+
+It's great to identify which parts of our code are lacking test coverage and generate reports with [Istanbul](https://github.com/gotwarlost/istanbul), that calculates the percentage of code accessed by tests.
+
+```
+npm install karma karma-coverage --save-dev
 ```
 
 ### Configuration files
@@ -83,6 +91,7 @@ If we haven't followed all the previous steps we must copy the following `packag
     "jasmine-core": "^2.3.4",
     "karma": "^0.12.32",
     "karma-chrome-launcher": "^0.1.12",
+    "karma-coverage": "^0.3.1",
     "karma-jasmine": "^0.3.5",
     "karma-ng-html2js-preprocessor": "^0.1.2"
   },
@@ -100,7 +109,7 @@ If we haven't generated yet a configuration file now it's the time.
 karma init
 ```
 
-After answering some questions it will create a `karma.conf.js` file which we still have to modify for at least configuring the installed preprocessors.
+After answering some questions it will create a `karma.conf.js` file which we still have to modify including the list of files to load in the browser and configuring the installed preprocessors (ng-html2js and coverage).
 
 The final configuration file should look as follows.
 
@@ -123,7 +132,8 @@ module.exports = function(config) {
     ],
 
     preprocessors: {
-      'src/**/*.html': ['ng-html2js']
+      'src/**/*.html': ['ng-html2js'],
+      'src/**/!(*.mock|*.spec).js': ['coverage']
     },
 
     ngHtml2JsPreprocessor: {
@@ -133,7 +143,13 @@ module.exports = function(config) {
       moduleName: 'templates'
     },
 
-    reporters: ['progress'],
+    reporters: ['progress', 'coverage'],
+    
+    coverageReporter: {
+      type : 'html',
+      // output coverage reports
+      dir : 'coverage/'
+    },
 
     port: 9876,
 
