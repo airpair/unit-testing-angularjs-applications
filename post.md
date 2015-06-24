@@ -4,7 +4,7 @@ This post tries to show a few patterns and guidelines to help us with unit testi
 
 It's aimed to people who is already familiar with Angular but haven't gone deep into unit testing their applications. Although it should be helpful too for completely beginners.
 
-## Configuration
+## Setting up Angular unit tests
 
 Before we start testing we need to install and configure several dependencies. For this we will be using the package manager [npm](https://www.npmjs.com/), although [Bower](http://bower.io/) can be used as well.
 
@@ -13,9 +13,9 @@ npm install angular --save
 bower install angular --save
 ```
 
-Note that we can skip to the [files](#files) section if we don't want to go step by step.
+Note that we can skip to the [configuration files](#configuration-files) section if we don't want to go step by step.
 
-### ngMock
+### The ngMock module
 
 Angular provides [ngMock](https://docs.angularjs.org/api/ngMock) to inject and mock services into unit tests. And one of the most useful parts of the `ngMock` module is `$httpBackend` which lets us mock XHR requests.
 
@@ -23,7 +23,7 @@ Angular provides [ngMock](https://docs.angularjs.org/api/ngMock) to inject and m
 npm install angular-mocks --save-dev
 ```
 
-### Karma
+### Configuring Karma with Jasmine
 
 [Karma](http://karma-runner.github.io/) is a test runner written by the Angular team which allow us to execute tests in multiple browsers.
 
@@ -33,7 +33,7 @@ npm install karma --save-dev
 
 After installing it we need to crete a configuration file running `karma init` but to extend its functionality we need to install first some plugins.
 
-#### Testing framework
+**Testing framework**
 
 Angular can be tested using any JavaScript unit testing framework out there, but [Jasmine](http://jasmine.github.io/) is probably the most popular.
 
@@ -41,7 +41,7 @@ Angular can be tested using any JavaScript unit testing framework out there, but
 npm install karma-jasmine jasmine-core --save-dev
 ```
 
-#### Browsers
+**Browsers**
 
 Karma takes care of auto-capturing and killing the browsers, but we need to install at least one of these launchers.
 
@@ -54,7 +54,7 @@ npm install karma-opera-launcher --save-dev
 npm install karma-ie-launcher --save-dev
 ```
 
-#### Templates preprocessor
+**Templates preprocessor**
 
 When testing directives we need to set up Karma to serve our templates using a preprocessor to convert HTML into JS string.
 
@@ -64,9 +64,9 @@ When testing directives we need to set up Karma to serve our templates using a p
 $ npm install karma-ng-html2js-preprocessor --save-dev
 ```
 
-### Files
+### Configuration files
 
-#### package.json
+**package.json**
 
 If we haven't followed all the previous steps we must copy the following `package.json` and run `npm install` to have all the required dependencies.
 
@@ -92,7 +92,7 @@ If we haven't followed all the previous steps we must copy the following `packag
 }
 ```
 
-#### karma.conf.js
+**karma.conf.js**
 
 If we haven't generated yet a configuration file now it's the time.
 
@@ -157,7 +157,7 @@ karma start
 npm test
 ```
 
-## Mocks
+## Mocking external dependencies
 
 To test the functionality of a piece of code in isolation we need to mock any dependency.
 
@@ -169,9 +169,9 @@ The Angular [injector](https://docs.angularjs.org/api/auto/service/$injector) re
 
 So there are at least two ways we can mock our services:
 
-### Using $provide
+### Using the $provide service
 
-We can provide our own implementation in a `beforeEach` Jasmine block.
+We can provide our own implementation in a `beforeEach` Jasmine block, creating an object with the same methods as the original service.
 
 ```javascript
 var myService;
@@ -184,9 +184,9 @@ beforeEach(module(function($provide) {
 }));
 ```
 
-### Creating a provider mock
+### Creating a reusable service provider mock
 
-Or we can reuse it creating the implementation in a separate `my-service.mock.js` file.
+Or we can reuse it creating the implementation in a separate `my-service.mock.js` file using the provider syntax.
 
 ```javascript
 angular.module('myServiceMock', [])
@@ -213,7 +213,7 @@ beforeEach(inject(function(_myService_) {
 
 In any case it's good to **load the mocked modules after** the module we are testing to be sure the mock overrides the actual implementation.
 
-## Testing
+## Testing patterns
 
 As code and specs are better placed side-by-side we can put all our files inside the `src` folder, using the `.spec.js` suffix to differentiate test files.
 
@@ -265,7 +265,7 @@ Controllers are easy to test as long as we don't manipulate the DOM and function
 
 We should test for the state, synchronous and asynchronous calls to services, and events.
 
-#### Code
+**Code**
 
 We create our basic controller using the `controller as` syntax. And we inject the dependencies on a external service and the `$scope` for using events.
 
@@ -353,7 +353,7 @@ function MyController($scope, myService) {
 }
 ```
 
-####Specs
+**Specs**
 
 We write the essential structure of the test suite loading the mocked service after the controller's module. 
 
@@ -502,7 +502,7 @@ In addition of testing calls to other services, we should test for the output of
 But as we don't want to send XHR requests to a real server we use
 [$httpBackend](https://docs.angularjs.org/api/ngMock/service/$httpBackend).
 
-####Code
+**Code**
 
 We lay out a simple service with a synchronous method that calculates the factorial and one asynchronous that uses the native `$http` service to query an external API for data.
 
@@ -542,7 +542,7 @@ Note that if we return a non-promised value from the error callback it will reso
   }
 ```
 
-####Specs
+**Specs**
 
 Setting the test we need to get hold of the `$httpBackend` to mock the calls to the API and test for the expected results.
 
@@ -662,7 +662,7 @@ Directives are a bit more complex to test as we need to [$compile](https://docs.
 
 Additionally we use [angular.element](https://docs.angularjs.org/api/ng/function/angular.element) and the provided jQuery or jqLite methods to manipulate the DOM.
 
-####Code
+**Code**
 
 We create a directive with an isolated scope and its own controller.
 
@@ -694,7 +694,7 @@ And the external template to see `ng-html2js` in action.
 <h1 ng-click="vm.doSomething()">{{vm.something.name}}</h1>
 ```
 
-####Specs
+**Specs**
 
 To test it we need to load the directive's module but also the one holding all the templates that we have configured with `ng-html2js`.
 
@@ -766,7 +766,7 @@ Providers are the toughest to test as we need to intercept them before they are 
 
 But once we have solved that step we can test them as any other service.
 
-####Code
+**Code**
 
 Our Hello World provider can be configured to say "hello" to anything.
 
@@ -791,7 +791,7 @@ function helloWorld() {
 }
 ```
 
-####Specs
+**Specs**
 
 We intercept the provider when we load the module before triggering the injection.
 
