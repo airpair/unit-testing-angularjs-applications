@@ -184,7 +184,7 @@ beforeEach(module(function($provide) {
 }));
 ```
 
-### Creating a reusable service provider mock
+### Creating a reusable service provider
 
 Or we can reuse it creating the implementation in a separate `my-service.mock.js` file using the provider syntax.
 
@@ -833,7 +833,9 @@ And then we can test both instances.
   });
 ```
 
-##Conclusion
+## Conclusion and next steps
 
 Although unit testing might seem scary at the beginning, once we master some of these patterns it's going to be a breeze to test our applications, making us feel more confident with the code we are developing.
+
+But this is just the tip of the iceberg as unit testing help us to test isolated pieces of code. To check if all these pieces work well when integrated together we need to do [end to end testing](https://docs.angularjs.org/guide/e2e-testing) (e2e) and for it we have to use the [Protractor](https://angular.github.io/protractor/#/) framework, built by the Angular team.
 
