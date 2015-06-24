@@ -321,7 +321,7 @@ We call the service asynchronously setting the success and error handlers.
   );
 ```
 
-And finally we use the `$scope' to handle events.
+And finally we use the `$scope` to handle events.
   
 ```javascript
   $scope.$emit('my-event');
@@ -680,7 +680,7 @@ Additionally we use [angular.element](https://docs.angularjs.org/api/ng/function
 
 **Code**
 
-We create a directive with an isolated scope and its own controller.
+We create a directive with an isolated scope and its own controller using the `controller as` syntax.
 
 ```javascript
 angular.module('myDirectiveModule', [])
@@ -704,7 +704,7 @@ angular.module('myDirectiveModule', [])
   });
 ```
 
-And the external template to see `ng-html2js` in action.
+And we use an external template to see ng-html2js in action.
 
 ```html
 <h1 ng-click="vm.doSomething()">{{vm.something.name}}</h1>
@@ -712,9 +712,9 @@ And the external template to see `ng-html2js` in action.
 
 **Specs**
 
-To test it we need to load the directive's module but also the one holding all the templates that we have configured with `ng-html2js`.
+To test it we need to load the directive's module but also the one holding all the templates that we have configured before with the ng-html2js preprocessor.
 
-Next we `$compile`the directive and apply the desired scope. 
+Next we `$compile` the directive and to apply the desired scope we need to trigger the `$digest` loop.
 
 ```javascript
 describe('Directive: myDirective', function() {
@@ -729,7 +729,7 @@ describe('Directive: myDirective', function() {
     element = angular.element('<my-directive something="thing"></my-directive>');
     element = $compile(element)(scope);
     scope.thing = {name: 'My thing'};
-    scope.$apply();
+    scope.$digest();
   }));
 
 });
@@ -744,20 +744,18 @@ Using the jQuery/jqLite methods we can check for what have been rendered.
   });
 ```
 
-And applying changes to the scope the rendered DOM should be updated.
-
+And when the **scope changes** we should check if the rendered DOM has been updated with the new values.
 
 ```javascript
   it('should update the rendered text when scope changes', function() {
     scope.thing.name = 'My new thing';
-    scope.$apply();
+    scope.$digest();
     var h1 = element.find('h1');
     expect(h1.text()).toBe('My new thing');
   });
 ```
 
-If is needed we can test the directive controller grabbing an instance of it.
-
+If is needed we can test the **directive controller** grabbing an instance of it, passing the name of the directive to the `element.controller()`.
 
 ```javascript
   describe('Directive controller', function() {
@@ -829,7 +827,7 @@ describe('Provider: helloWorld', function() {
 });
 ```
 
-And then we can test both instances.
+And then we can test both instances as we would do with any other service.
 
 ```javascript
   it('should do something', function() {
