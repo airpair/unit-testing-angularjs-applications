@@ -2,7 +2,7 @@ Unit testing, as the name implies, is about testing individual units of code.
 
 This post tries to show a few patterns and guidelines to help us with unit testing Angular applications after setting some minimum configuration.
 
-It's aimed to people who is already familiar with Angular but haven't gone deep into unit testing their applications. Although it should be helpful too for completely beginners.
+It's aimed at people who are already familiar with Angular but haven't gone deep into unit testing their applications. Although it should also be helpful for completely beginners.
 
 ## Setting up Angular unit tests
 
